@@ -38,8 +38,8 @@ extern "C" {
 # endif
 # ifndef OPENSSL_RSA_MAX_PUBEXP_BITS
 
-/* exponent limit enforced for "large" modulus only */
-#  define OPENSSL_RSA_MAX_PUBEXP_BITS    64
+/* exponent limit enforced for all moduli */
+#  define OPENSSL_RSA_MAX_PUBEXP_BITS    256
 # endif
 
 # define RSA_3   0x3L
