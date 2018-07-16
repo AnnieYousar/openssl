@@ -77,12 +77,12 @@ static int rsa_ossl_public_encrypt(int flen, const unsigned char *from,
         return -1;
     }
 
-    if (BN_ucmp(rsa->n, rsa->e) <= 0) {
+    if (BN_ucmp(rsa->n, rsa->e) <= 1) {
         RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_BAD_E_VALUE);
         return -1;
     }
 
-    /* for large moduli, enforce exponent limit */
+    /* enforce exponent limit for all moduli */
     if (BN_num_bits(rsa->n) > OPENSSL_RSA_SMALL_MODULUS_BITS) {
         if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
             RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_BAD_E_VALUE);
@@ -245,6 +245,27 @@ static int rsa_ossl_private_encrypt(int flen, const unsigned char *from,
      */
     BIGNUM *unblind = NULL;
     BN_BLINDING *blinding = NULL;
+
+    if (BN_num_bits(rsa->n) > OPENSSL_RSA_MAX_MODULUS_BITS) {
+        RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_MODULUS_TOO_LARGE);
+        return -1;
+    }
+
+    /*
+     * Do not sign with a private key, who's public key is insecure
+     */
+    if (BN_ucmp(rsa->n, rsa->e) <= 1) {
+        RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_BAD_E_VALUE);
+        return -1;
+    }
+
+    /* enforce exponent limit for all moduli */
+    if (BN_num_bits(rsa->n) > OPENSSL_RSA_SMALL_MODULUS_BITS) {
+        if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
+            RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_BAD_E_VALUE);
+            return -1;
+        }
+    }
 
     if ((ctx = BN_CTX_new()) == NULL)
         goto err;
@@ -499,24 +520,6 @@ static int rsa_ossl_public_decrypt(int flen, const unsigned char *from,
     int i, num = 0, r = -1;
     unsigned char *buf = NULL;
     BN_CTX *ctx = NULL;
-
-    if (BN_num_bits(rsa->n) > OPENSSL_RSA_MAX_MODULUS_BITS) {
-        RSAerr(RSA_F_RSA_OSSL_PUBLIC_DECRYPT, RSA_R_MODULUS_TOO_LARGE);
-        return -1;
-    }
-
-    if (BN_ucmp(rsa->n, rsa->e) <= 0) {
-        RSAerr(RSA_F_RSA_OSSL_PUBLIC_DECRYPT, RSA_R_BAD_E_VALUE);
-        return -1;
-    }
-
-    /* for large moduli, enforce exponent limit */
-    if (BN_num_bits(rsa->n) > OPENSSL_RSA_SMALL_MODULUS_BITS) {
-        if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
-            RSAerr(RSA_F_RSA_OSSL_PUBLIC_DECRYPT, RSA_R_BAD_E_VALUE);
-            return -1;
-        }
-    }
 
     if ((ctx = BN_CTX_new()) == NULL)
         goto err;
