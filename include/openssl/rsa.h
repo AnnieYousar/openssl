@@ -38,7 +38,7 @@ extern "C" {
 # endif
 # ifndef OPENSSL_RSA_MAX_PUBEXP_BITS
 
-/* exponent limit enforced for "large" modulus only */
+/* exponent limit enforced for all moduli */
 #  define OPENSSL_RSA_MAX_PUBEXP_BITS    64
 # endif
 
