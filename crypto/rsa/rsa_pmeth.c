@@ -465,7 +465,7 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
             return -2;
         }
         if (p2 >  OPENSSL_RSA_MAX_MODULUS_BITS) {
-            RSAerr(RSA_F_PKEY_RSA_CTRL, RSA_R_KEY_SIZE_TOO_SMALL);
+            RSAerr(RSA_F_PKEY_RSA_CTRL, RSA_R_MODULUS_TOO_LARGE);
             return -2;
         }
         rctx->nbits = p1;
