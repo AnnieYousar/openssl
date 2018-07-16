@@ -82,12 +82,10 @@ static int rsa_ossl_public_encrypt(int flen, const unsigned char *from,
         return -1;
     }
 
-    /* for large moduli, enforce exponent limit */
-    if (BN_num_bits(rsa->n) > OPENSSL_RSA_SMALL_MODULUS_BITS) {
-        if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
-            RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_BAD_E_VALUE);
-            return -1;
-        }
+    /* enforce exponent limit for all moduli */
+    if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
+        RSAerr(RSA_F_RSA_OSSL_PUBLIC_ENCRYPT, RSA_R_BAD_E_VALUE);
+        return -1;
     }
 
     if ((ctx = BN_CTX_new()) == NULL)
@@ -510,12 +508,10 @@ static int rsa_ossl_public_decrypt(int flen, const unsigned char *from,
         return -1;
     }
 
-    /* for large moduli, enforce exponent limit */
-    if (BN_num_bits(rsa->n) > OPENSSL_RSA_SMALL_MODULUS_BITS) {
-        if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
-            RSAerr(RSA_F_RSA_OSSL_PUBLIC_DECRYPT, RSA_R_BAD_E_VALUE);
-            return -1;
-        }
+    /* enforce exponent limit for all moduli*/
+    if (BN_num_bits(rsa->e) > OPENSSL_RSA_MAX_PUBEXP_BITS) {
+        RSAerr(RSA_F_RSA_OSSL_PUBLIC_DECRYPT, RSA_R_BAD_E_VALUE);
+        return -1;
     }
 
     if ((ctx = BN_CTX_new()) == NULL)
