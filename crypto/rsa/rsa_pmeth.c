@@ -54,7 +54,7 @@ static int pkey_rsa_init(EVP_PKEY_CTX *ctx)
 
     if (rctx == NULL)
         return 0;
-    rctx->nbits = 1024;
+    rctx->nbits = 2048;
     rctx->primes = RSA_DEFAULT_PRIME_NUM;
     if (pkey_ctx_is_pss(ctx))
         rctx->pad_mode = RSA_PKCS1_PSS_PADDING;
@@ -460,7 +460,11 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
         return 1;
 
     case EVP_PKEY_CTRL_RSA_KEYGEN_BITS:
-        if (p1 < RSA_MIN_MODULUS_BITS) {
+        if (p1 < OPENSSL_RSA_MIN_MODULUS_BITS) {
+            RSAerr(RSA_F_PKEY_RSA_CTRL, RSA_R_KEY_SIZE_TOO_SMALL);
+            return -2;
+        }
+        if (p2 >  OPENSSL_RSA_MAX_MODULUS_BITS) {
             RSAerr(RSA_F_PKEY_RSA_CTRL, RSA_R_KEY_SIZE_TOO_SMALL);
             return -2;
         }
@@ -468,7 +472,8 @@ static int pkey_rsa_ctrl(EVP_PKEY_CTX *ctx, int type, int p1, void *p2)
         return 1;
 
     case EVP_PKEY_CTRL_RSA_KEYGEN_PUBEXP:
-        if (p2 == NULL || !BN_is_odd((BIGNUM *)p2) || BN_is_one((BIGNUM *)p2)) {
+        if (p2 == NULL || !BN_is_odd((BIGNUM *)p2) || BN_is_one((BIGNUM *)p2) 
+            || BN_num_bits(p2) > 256) {
             RSAerr(RSA_F_PKEY_RSA_CTRL, RSA_R_BAD_E_VALUE);
             return -2;
         }
